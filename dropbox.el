@@ -46,6 +46,8 @@
 
 ;; Suggestion to developers: M-x occur ";;;"
 
+;;; Code:
+
 (require 'oauth)
 (require 'json)
 
