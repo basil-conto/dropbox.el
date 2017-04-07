@@ -29,6 +29,7 @@
 ;; effectively acting as an Emacs Dropbox client and SDK.
 
 ;;; TODO
+;; - Migrate to OAuth 2.0
 ;; - Return permissions other than -rwx------ if folder has shares
 ;; - dropbox-handle-set-visited-file-modtime might need actual implementation
 ;; - Switching to deleted buffer on file open
