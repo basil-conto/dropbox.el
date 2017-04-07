@@ -56,10 +56,11 @@
   :prefix "dropbox-"
   :group 'file)
 
-(defcustom dropbox-token-file "~/.emacs.d/dropbox-token"
+(defcustom dropbox-token-file
+  (expand-file-name "dropbox-token" user-emacs-directory)
   "The file where dropbox.el will store your Dropbox credentials"
   :group 'dropbox
-  :type 'string)
+  :type 'file)
 
 (defcustom dropbox-locale "en_US"
   "The locale in which to return file sizes and times"
