@@ -985,8 +985,7 @@ The optional seventh arg MUSTBENEW, if non-nil, insists on a check
   nil)
 
 (defun dropbox-handle-load (file &optional noerror nomessage nosuffix must-suffix)
-  "Loads a Lisp file from Dropbox, by copying it to a temporary"
-
+  "Load a Lisp file from Dropbox, by copying it to a temporary."
   (load (file-local-copy file) noerror nomessage nosuffix must-suffix))
 
 (provide 'dropbox)
