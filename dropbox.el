@@ -28,8 +28,6 @@
 ;; This package allows one to access files stored in Dropbox,
 ;; effectively acting as an Emacs Dropbox client and SDK.
 
-(provide 'dropbox)
-
 ;;; TODO
 ;; - Return permissions other than -rwx------ if folder has shares
 ;; - dropbox-handle-set-visited-file-modtime might need actual implementation
@@ -986,5 +984,7 @@ The optional seventh arg MUSTBENEW, if non-nil, insists on a check
   "Loads a Lisp file from Dropbox, by copying it to a temporary"
 
   (load (file-local-copy file) noerror nomessage nosuffix must-suffix))
+
+(provide 'dropbox)
 
 ;;; dropbox.el ends here
