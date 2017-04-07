@@ -95,22 +95,22 @@ debugging but otherwise very intrusive."
   :group 'dropbox
   :type 'boolean)
 
-; OAuth URL Endpoints
+;; OAuth URL Endpoints
 (defvar dropbox-request-url       "https://api.dropbox.com/1/oauth/request_token")
 (defvar dropbox-access-url        "https://api.dropbox.com/1/oauth/access_token")
 (defvar dropbox-authorization-url "https://api.dropbox.com/1/oauth/authorize")
 
-; Dropbox URL Endpoint hosts
+;; Dropbox URL Endpoint hosts
 (defvar dropbox-api-host "api.dropbox.com")
 (defvar dropbox-api-content-host "api-content.dropbox.com")
 (defvar dropbox-content-apis '("files" "files_put" "thumbnails"
                                "commit_chunked_upload"))
-; Locale information
+;; Locale information
 (defvar dropbox-get-not-locale '("files" "copy_ref" "thumbnails"))
 (defvar dropbox-post-not-locale '("chunked_upload"))
 
 
-; Do not edit the prefix -- lots of hard-coded regexes everywhere
+;; Do not edit the prefix -- lots of hard-coded regexes everywhere
 (defconst dropbox-prefix "/db:")
 (defvar dropbox-cache ())
 (defvar dropbox-access-token nil)
@@ -362,7 +362,7 @@ non-nil."
     (find-backup-file-name . dropbox-handle-find-backup-file-name)
     (make-auto-save-file-name . dropbox-handle-make-auto-save-file-name)
 
-    ; Predicates
+    ;; Predicates
     (file-directory-p . dropbox-handle-file-directory-p)
     (file-executable-p . dropbox-handle-file-executable-p)
     (file-exists-p . dropbox-handle-file-exists-p)
@@ -375,7 +375,7 @@ non-nil."
     (file-writable-p . dropbox-handle-file-writable-p)
     (vc-registered . dropbox-handle-vc-registered)
 
-    ; Attributes
+    ;; Attributes
     (file-attributes . dropbox-handle-file-attributes)
     (file-modes . dropbox-handle-file-modes)
     (set-file-modes . dropbox-handle-set-file-modes)
@@ -386,7 +386,7 @@ non-nil."
     (verify-visited-file-modtime . dropbox-handle-verify-visited-file-modtime)
     (set-file-times . dropbox-handle-set-file-times)
 
-    ; Directory Contents
+    ;; Directory Contents
     (directory-files . dropbox-handle-directory-files)
     (directory-files-and-attributes
      . dropbox-handle-directory-files-and-attributes)
@@ -407,13 +407,13 @@ non-nil."
     (dired-insert-directory . dropbox-handle-dired-insert-directory)
     (dired-uncache . dropbox-handle-dired-uncache)
 
-    ; File Contents
+    ;; File Contents
     (insert-file-contents . dropbox-handle-insert-file-contents)
     (file-local-copy . dropbox-handle-file-local-copy)
     (dired-compress-file . dropbox-handle-dired-compress-file)
     (write-region . dropbox-handle-write-region)
 
-    ; Misc
+    ;; Misc
     (load . dropbox-handle-load)
 
     (process-file . dropbox-handle-process-file)
@@ -522,7 +522,7 @@ FILENAME names a directory"
          (not (assoc 'is_deleted resp)))))
 
 (defun dropbox-handle-file-newer-than-file-p (file1 file2)
-  ; these files might not both be dropbox files
+  ;; These files might not both be dropbox files
   (let ((file1attr (file-attributes file1))
 	(file2attr (file-attributes file2)))
     (let ((time1 (if file1attr (elt file1attr 4) nil))
@@ -584,7 +584,7 @@ FILENAME names a directory"
             date ; mtime
             date ; ctime
             (cdr (assoc 'bytes resp)) ; size in bytes
-            ; TODO figure out if folder has any shares
+            ;; TODO figure out if folder has any shares
             (concat (if (cdr (assoc 'is_dir resp)) "d" "-") "rwx------") ; perms
             nil
             0
@@ -600,7 +600,7 @@ FILENAME names a directory"
   nil)
 
 (defun dropbox-handle-set-visited-file-modtime (&optional time-list)
-  ; TODO: this might need to be implemented
+  ;; TODO: This might need to be implemented
   nil)
 
 (defun dropbox-handle-file-selinux-context (filename)
@@ -743,9 +743,9 @@ NOSORT is useful if you plan to sort the result yourself."
      "Inserting directory `ls %s %s', wildcard %s, fulldir %s"
      switches filename wildcard full-directory-p)
 
-    ; TODO: look into uids, gids, and reformatting the date    
-    ; example directory listing:
-    ; -rw-r--r--   1 ahaven  staff   1476 Jan  7 12:48 tramp.py
+    ;; TODO: Look into UIDs, GIDs, and reformatting the date.
+    ;; Example directory listing:
+    ;; -rw-r--r--   1 ahaven  staff   1476 Jan  7 12:48 tramp.py
     (if (not full-directory-p)
         (let ((attributes (file-attributes filename 'string)))
           (insert (format "  %s %2d %8s %8s %8d %s "
@@ -784,7 +784,7 @@ NOSORT is useful if you plan to sort the result yourself."
 
 (defun dropbox-handle-copy-file (file newname &optional ok-if-already-exists
                                       keep-time preserve-uid-gid preserve-selinux-context)
-  ; TODO: implement ok-if-already-exists parameter
+  ;; TODO: Implement ok-if-already-exists parameter
   (cond
    ((and (dropbox-file-p file) (dropbox-file-p newname))
     (dropbox-cache "metadata" newname
@@ -844,8 +844,8 @@ are /db: files, but otherwise is not necessarily atomic."
 ;;; File contents
 
 (defun dropbox-handle-insert-file-contents (filename &optional visit beg end replace)
-  ; TODO: Fails on images with switch to deleted buffer
-  ; TODO: implement replace
+  ;; FIXME: Fails on images with switch to deleted buffer
+  ;; TODO:  Implement replace
   (barf-if-buffer-read-only)
   (let* ((buf (current-buffer))
          (respbuf (dropbox-get "files" filename))
@@ -864,7 +864,7 @@ are /db: files, but otherwise is not necessarily atomic."
       (setf buffer-file-name filename)
       (setf buffer-read-only (not (file-writable-p filename))))))
 
-; Redefine oauth-curl-retrieve to take extra-curl-args and to echo the curl command
+;; Redefine oauth-curl-retrieve to take extra-curl-args and to echo the curl command
 (defun oauth-curl-retrieve (url)
   "Retrieve via curl"
   (url-gc-dead-buffers)
@@ -955,8 +955,9 @@ The optional seventh arg MUSTBENEW, if non-nil, insists on a check
   confirmation before overwriting, but do go ahead and overwrite the file
   if the user confirms."
 
-  ; TODO: implement lockname and mustbenew
-  (assert (not append)) ; TODO: implement append
+  ;; TODO: * Implement lockname and mustbenew
+  ;;       * Implement append
+  (assert (not append))
 
   (let ((localfile (make-auto-save-file-name)))
     (write-region start end localfile nil 1)
