@@ -112,13 +112,13 @@ debugging but otherwise very intrusive."
 
 ; Do not edit the prefix -- lots of hard-coded regexes everywhere
 (defconst dropbox-prefix "/db:")
-(defvar dropbox-cache '())
+(defvar dropbox-cache ())
 (defvar dropbox-access-token nil)
 
 ;;; Utilities
 
 (defun dropbox-message (fmt-string &rest args)
-  (when dropbox-verbose (apply 'message fmt-string args)))
+  (when dropbox-verbose (apply #'message fmt-string args)))
 
 (defconst url-non-sanitized-chars
   (delete ?~ (append url-unreserved-chars '(?/ ?:))))
@@ -184,13 +184,12 @@ string: \"%\" followed by two lowercase hex digits."
     value))
 
 (defun dropbox-un-cache (name path)
-  (setf dropbox-cache (remove-if '(lambda (x) (equal (car x) (cons name path)))
+  (setf dropbox-cache (remove-if (lambda (x) (equal (car x) (cons name path)))
                                  dropbox-cache)))
 
 (defun dropbox-uncache ()
   (interactive)
-
-  (setf dropbox-cache '()))
+  (setq dropbox-cache ()))
 
 ;;; Requesting URLs
 
@@ -212,8 +211,8 @@ string: \"%\" followed by two lowercase hex digits."
     (let ((extra-curl-args (if (and curl-tracefile
                                     (not extra-curl-args))
                                `("--trace" ,curl-tracefile)
-                               extra-curl-args))
-          (oauth-nonce-function (function oauth-internal-make-nonce)))
+                             extra-curl-args))
+          (oauth-nonce-function #'oauth-internal-make-nonce))
 
       (oauth-fetch-url dropbox-access-token
                        (concat (dropbox-url name path)
@@ -264,7 +263,7 @@ non-nil."
   (dropbox-un-cache name path)
   (dropbox-message "Requesting %s for %s" name path)
 
-  (let* ((oauth-nonce-function (function oauth-internal-make-nonce))
+  (let* ((oauth-nonce-function #'oauth-internal-make-nonce)
          (buf (with-default-directory "~/"
                (oauth-post-url dropbox-access-token
                                (concat (dropbox-url name path)
@@ -302,7 +301,7 @@ non-nil."
         (kill-this-buffer)))
   (unless dropbox-access-token ; Oh, we need to get a token
     (setq dropbox-access-token
-          (let ((oauth-nonce-function (function oauth-internal-make-nonce)))
+          (let ((oauth-nonce-function #'oauth-internal-make-nonce))
             (oauth-authorize-app dropbox-consumer-key dropbox-consumer-secret
                                  dropbox-request-url dropbox-access-url
                                  dropbox-authorization-url)))
@@ -655,7 +654,7 @@ NOSORT is useful if you plan to sort the result yourself."
 		    if (or (null match) (string-match match fname))
 		    collect fname)
 	    nil)))
-    (if nosort unsorted (sort unsorted 'string-lessp))))
+    (if nosort unsorted (sort unsorted #'string-lessp))))
 
 (defun dropbox-handle-directory-files-and-attributes (directory &optional full match nosort id-format)
   (let ((files (directory-files directory full match nosort)))
@@ -739,7 +738,7 @@ NOSORT is useful if you plan to sort the result yourself."
       (setq switches (split-string switches)))
     (unless full-directory-p
       (setq switches (add-to-list 'switches "-d" 'append)))
-    (setq switches (mapconcat 'shell-quote-argument switches " "))
+    (setq switches (mapconcat #'shell-quote-argument switches " "))
     (dropbox-message
      "Inserting directory `ls %s %s', wildcard %s, fulldir %s"
      switches filename wildcard full-directory-p)
@@ -875,7 +874,7 @@ are /db: files, but otherwise is not necessarily atomic."
                      "-i" ,url
                      ,@(when oauth-post-vars-alist
                          (apply
-                          'append
+                          #'append
                           (mapcar
                            (lambda (pair)
                              (list
@@ -886,7 +885,7 @@ are /db: files, but otherwise is not necessarily atomic."
                      ,@(oauth-headers-to-curl url-request-extra-headers)
                      ,@extra-curl-args)))
     (dropbox-message "curl-args: %s" curl-args)
-    (apply 'call-process "curl" nil t nil curl-args))
+    (apply #'call-process "curl" nil t nil curl-args))
   (url-mark-buffer-as-dead (current-buffer))
   (current-buffer))
 
@@ -896,7 +895,7 @@ are /db: files, but otherwise is not necessarily atomic."
   (save-excursion
     (let* ((extra-curl-args `("--data-binary" ,(concat "@" local-path)))
            (url-request-extra-headers '(("Content-Type" . "application/octet-stream")))
-           (resp (dropbox-post "files_put" remote-path '())))
+           (resp (dropbox-post "files_put" remote-path ())))
       (if (dropbox-error-p resp)
           nil
         (dropbox-cache "metadata" remote-path resp)))))
