@@ -573,24 +573,23 @@ FILENAME names a directory"
 ;;; Attributes
 
 (defun dropbox-handle-file-attributes (filename &optional id-format)
-  (let ((resp
-         (dropbox-get-json "metadata" filename)))
-    (if (dropbox-error-p resp)
-        nil
-      (let ((date (date-to-time (cdr (assoc 'modified resp)))))
-      (list (cdr (assoc 'is_dir resp)) ; Is dir?
-            1 ; Number of links
-            0 ; UID
-            0 ; GID
-            date ; atime
-            date ; mtime
-            date ; ctime
-            (cdr (assoc 'bytes resp)) ; size in bytes
-            ;; TODO figure out if folder has any shares
-            (concat (if (cdr (assoc 'is_dir resp)) "d" "-") "rwx------") ; perms
-            nil
-            0
-            0)))))
+  (let ((resp (dropbox-get-json "metadata" filename)))
+    (unless (dropbox-error-p resp)
+      (let ((date (date-to-time (cdr (assoc 'modified resp))))
+            (dirp (cdr (assoc 'is_dir resp))))
+        (list dirp                                   ; Type
+              1                                      ; # hard links
+              0                                      ; UID
+              0                                      ; GID
+              date                                   ; atime
+              date                                   ; mtime
+              date                                   ; ctime
+              (cdr (assoc 'bytes resp))              ; Size in bytes
+              ;; TODO: figure out if folder has any shares
+              (concat (if dirp "d" "-") "rwx------") ; Modes
+              nil                                    ; Ignored
+              0                                      ; Inode #
+              0)))))                                 ; Device #
 
 (defun dropbox-handle-file-modes (filename)
   448) ; 448 = 0b111000000 is rwx------
