@@ -109,7 +109,7 @@ debugging but otherwise very intrusive."
 
 
 ; Do not edit the prefix -- lots of hard-coded regexes everywhere
-(defvar dropbox-prefix "/db:")
+(defconst dropbox-prefix "/db:")
 (defvar dropbox-cache '())
 (defvar dropbox-access-token nil)
 
