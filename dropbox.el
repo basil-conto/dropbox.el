@@ -167,21 +167,20 @@ passing STRING to `url-hexify-string'."
       nil)))
 
 (defun dropbox-cache (name path value)
-  (setf path (dropbox-strip-final-slash path))
-  (let ((cached (assoc (cons name path) dropbox-cache)))
-    (if cached
-        (setf (cdr cached) (cons (current-time) value)))
-    (setf dropbox-cache (cons `((,name . ,path) . (,(current-time) . ,value))
-                              dropbox-cache))
+  (let* ((path   (dropbox-strip-final-slash path))
+         (cached (assoc (cons name path) dropbox-cache)))
+    (when cached
+      (setcdr cached (cons (current-time) value)))
 
-    (if (and (string= name "metadata")
-             (not (dropbox-error-p value))
-             (assoc 'contents value))
+    (push `((,name . ,path) . (,(current-time) . ,value)) dropbox-cache)
+
+    (when (and (string= name "metadata")
+               (not (dropbox-error-p value))
+               (assoc 'contents value))
         (loop for ent across (cdr (assoc 'contents value))
               for path = (concat dropbox-prefix
                                  (string-strip-prefix "/" (cdr (assoc 'path ent))))
               do (dropbox-cache "metadata" path ent)))
-
     value))
 
 (defun dropbox-un-cache (name path)
