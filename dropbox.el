@@ -592,7 +592,7 @@ FILENAME names a directory"
               0)))))                                 ; Device #
 
 (defun dropbox-handle-file-modes (filename)
-  448) ; 448 = 0b111000000 is rwx------
+  #o700) ; rwx------
 
 (defun dropbox-handle-set-file-modes (filename mode)
   nil)
