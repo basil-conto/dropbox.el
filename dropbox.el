@@ -122,23 +122,22 @@ debugging but otherwise very intrusive."
 (defun dropbox-message (fmt-string &rest args)
   (when dropbox-verbose (apply #'message fmt-string args)))
 
-(defconst url-non-sanitized-chars
-  (delete ?~ (append url-unreserved-chars '(?/ ?:))))
+(defconst dropbox-unreserved-chars
+  (delete ?~ (append url-unreserved-chars '(?/ ?:)))
+  "Modified `url-unreserved-chars' for dropbox URIs.")
 
-(defun url-hexify-url (string)
-  "Return a new string that is STRING URI-encoded.
-First, STRING is converted to utf-8, if necessary.  Then, for each
-character in the utf-8 string, those found in `url-non-sanitized-chars'
-are left as-is, all others are represented as a three-character
-string: \"%\" followed by two lowercase hex digits."
-  (mapconcat (lambda (byte)
-               (if (memq byte url-non-sanitized-chars)
-                   (char-to-string byte)
-                 (format "%%%02x" byte)))
-             (if (multibyte-string-p string)
-                 (encode-coding-string string 'utf-8)
-               string)
-             ""))
+(defun dropbox-hexify-string (string &optional allowed-chars)
+  "Wrap `url-hexify-string' with modified ALLOWED-CHARS.
+Let-bind `url-unreserved-chars' to the first non-nil value
+amongst ALLOWED-CHARS and `dropbox-unreserved-chars' before
+passing STRING to `url-hexify-string'."
+  ;; KLUDGE: Let-binding a defconst-defined variable is bad practice, but there
+  ;;         are few alternatives until `url-hexify-string' gains an optional
+  ;;         extra argument in Emacs 24.3.
+  (let ((url-unreserved-chars (or allowed-chars
+                                  dropbox-unreserved-chars
+                                  url-unreserved-chars)))
+    (url-hexify-string string)))
 
 (defun dropbox-strip-final-slash (path)
   (cond
