@@ -251,7 +251,7 @@ non-nil."
 
   (let ((cached (dropbox-cached name path)))
     (when (and want-contents (not (assoc 'contents cached)))
-      (setf cached nil))
+      (setq cached nil))
     (or cached
         (with-current-buffer (dropbox-get name path)
           (let ((code (dropbox-get-http-code (current-buffer))))
@@ -324,10 +324,8 @@ non-nil."
 (defun dropbox-connect ()
   "Connect to Dropbox, hacking the \"/db:\" syntax into `find-file`."
   (interactive)
-
   (dropbox-authenticate)
-  (setf file-name-handler-alist
-        (cons '("\\`/db:" . dropbox-handler) file-name-handler-alist)))
+  (push '("\\`/db:" . dropbox-handler) file-name-handler-alist))
 
 (defun dropbox-handler (operation &rest args)
   "Handles IO operations to Dropbox files"
@@ -628,7 +626,8 @@ FILENAME names a directory"
 
 (defun dropbox-extract-fname (file path &optional full)
   (let ((fname (string-strip-prefix "/" (cdr (assoc 'path file)))))
-    (if (cdr (assoc 'is_dir file)) (setf fname (concat fname "/")))
+    (when (cdr (assoc 'is_dir file))
+      (setq fname (concat fname "/")))
     (if full (concat dropbox-prefix fname)
       (string-strip-prefix "/" (string-strip-prefix path fname)))))
 
@@ -857,8 +856,8 @@ are /db: files, but otherwise is not necessarily atomic."
       (switch-to-buffer buf)
       (set-buffer-modified-p nil))
     (when visit
-      (setf buffer-file-name filename)
-      (setf buffer-read-only (not (file-writable-p filename))))))
+      (setq buffer-file-name filename
+            buffer-read-only (not (file-writable-p filename))))))
 
 ;; Redefine oauth-curl-retrieve to take extra-curl-args and to echo the curl command
 (defun oauth-curl-retrieve (url)
