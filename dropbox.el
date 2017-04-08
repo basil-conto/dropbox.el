@@ -152,7 +152,7 @@ passing STRING to `url-hexify-string'."
 (defmacro with-default-directory (dir &rest body)
   (declare (indent 1))
   `(let ((default-directory ,dir))
-       ,@body))
+     ,@body))
 
 ;;; Caching for the Dropbox API
 
@@ -269,11 +269,11 @@ non-nil."
 
   (let* ((oauth-nonce-function #'oauth-internal-make-nonce)
          (buf (with-default-directory "~/"
-               (oauth-post-url dropbox-access-token
-                               (concat (dropbox-url name path)
-                                       (if (not (member name dropbox-post-not-locale))
-                                           (concat "?locale=" dropbox-locale) ""))
-                               args))))
+                (oauth-post-url dropbox-access-token
+                                (concat (dropbox-url name path)
+                                        (if (not (member name dropbox-post-not-locale))
+                                            (concat "?locale=" dropbox-locale) ""))
+                                args))))
 
     (with-current-buffer buf
       (let ((code (dropbox-get-http-code buf)))
@@ -625,7 +625,7 @@ FILENAME names a directory"
 (defun string-strip-prefix (prefix str)
   (if (string-prefix-p prefix str)
       (substring str (length prefix))
-      str))
+    str))
 
 (defun dropbox-extract-fname (file path &optional full)
   (let ((fname (string-strip-prefix "/" (cdr (assoc 'path file)))))
@@ -644,14 +644,14 @@ Otherwise, the list returned is sorted with `string-lessp'.
 NOSORT is useful if you plan to sort the result yourself."
 
   (let* ((path (dropbox-strip-prefix directory))
-	 (metadata (dropbox-get-json "metadata" directory t)) ; want-contents: t
-	 (unsorted
-	  (if (cdr (assoc 'is_dir metadata))
-	      (loop for file across (cdr (assoc 'contents metadata))
-		    for fname = (dropbox-extract-fname file path full)
-		    if (or (null match) (string-match match fname))
-		    collect fname)
-	    nil)))
+         (metadata (dropbox-get-json "metadata" directory t)) ; want-contents: t
+         (unsorted
+          (if (cdr (assoc 'is_dir metadata))
+              (loop for file across (cdr (assoc 'contents metadata))
+                    for fname = (dropbox-extract-fname file path full)
+                    if (or (null match) (string-match match fname))
+                    collect fname)
+            nil)))
     (if nosort unsorted (sort unsorted #'string-lessp))))
 
 (defun dropbox-handle-directory-files-and-attributes (directory &optional full match nosort id-format)
@@ -722,11 +722,10 @@ NOSORT is useful if you plan to sort the result yourself."
 
 (defun dropbox-handle-dired-uncache (dir)
   "Remove DIR from the dropbox.el metadata cache"
-
   (dropbox-un-cache "metadata" dir))
 
 (defun dropbox-handle-insert-directory
-  (filename switches &optional wildcard full-directory-p)
+    (filename switches &optional wildcard full-directory-p)
   "Like `insert-directory' for Dropbox files. Code adapted from
 `tramp-sh-handle-insert-directory'."
 
@@ -764,9 +763,9 @@ NOSORT is useful if you plan to sort the result yourself."
             (let ((total (cdr (assoc 'quota quota-info)))
                   (normal (cdr (assoc 'normal quota-info)))
                   (shared (cdr (assoc 'shared quota-info))))
-            (insert (format "  used %d available %d (%.0f%% total used)"
-                            (+ shared normal) (- total normal shared)
-                            (/ (* (+ shared normal) 100.0) total))))
+              (insert (format "  used %d available %d (%.0f%% total used)"
+                              (+ shared normal) (- total normal shared)
+                              (/ (* (+ shared normal) 100.0) total))))
             (newline))))
       (loop for file in (if wildcard
                             (directory-files (file-name-directory filename) t filename)
@@ -923,8 +922,8 @@ are /db: files, but otherwise is not necessarily atomic."
     (dropbox-upload temp.z (concat file suffix))
     (delete-file file)))
 
-(defun dropbox-handle-write-region (start end filename &optional
-					  append visit lockname mustbenew)
+(defun dropbox-handle-write-region
+    (start end filename &optional append visit lockname mustbenew)
   "Write current region into specified file.
 When called from a program, requires three arguments:
 START, END and FILENAME.  START and END are normally buffer positions
