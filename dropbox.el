@@ -185,8 +185,9 @@ passing STRING to `url-hexify-string'."
     value))
 
 (defun dropbox-un-cache (name path)
-  (setf dropbox-cache (remove-if (lambda (x) (equal (car x) (cons name path)))
-                                 dropbox-cache)))
+  (let ((needle (cons name path)))
+    (setq dropbox-cache (remove-if (lambda (x) (equal (car x) needle))
+                                   dropbox-cache))))
 
 (defun dropbox-uncache ()
   (interactive)
