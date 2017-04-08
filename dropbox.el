@@ -196,14 +196,16 @@ passing STRING to `url-hexify-string'."
 ;;; Requesting URLs
 
 (defun dropbox-url (name &optional path)
-  (let ((ppath (concat "https://"
-                       (if (member name dropbox-content-apis)
-                           dropbox-api-content-host
-                         dropbox-api-host)
-                       "/1/" name)))
-    (if path
-        (concat ppath "/dropbox/" (url-hexify-url (string-strip-prefix "/" (dropbox-strip-prefix path))))
-      ppath)))
+  (format "https://%s/1/%s%s"
+          (if (member name dropbox-content-apis)
+              dropbox-api-content-host
+            dropbox-api-host)
+          name
+          (if path
+              (concat "/dropbox/"
+                      (dropbox-hexify-string
+                       (string-strip-prefix "/" (dropbox-strip-prefix path))))
+            "")))
 
 (defvar curl-tracefile nil)
 
