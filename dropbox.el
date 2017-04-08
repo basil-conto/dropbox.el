@@ -527,15 +527,11 @@ FILENAME names a directory"
 
 (defun dropbox-handle-file-newer-than-file-p (file1 file2)
   ;; These files might not both be dropbox files
-  (let ((file1attr (file-attributes file1))
-	(file2attr (file-attributes file2)))
-    (let ((time1 (if file1attr (elt file1attr 4) nil))
-	  (time2 (if file2attr (elt file2attr 4) nil)))
-      (if time1
-	  (if time2
-	      (time-less-p time2 time1)
-	    t)
-	nil))))
+  (let ((atime1 (elt (file-attributes file1) 4))
+        (atime2 (elt (file-attributes file2) 4)))
+    (and atime1
+         (or (not atime2)
+             (time-less-p time2 time1)))))
 
 (defun dropbox-handle-file-owner-preserved-p (file)
   "Files have only one owner in Dropbox, so ownership is always preserved"
