@@ -612,14 +612,13 @@ FILENAME names a directory"
 
 (defun dropbox-handle-verify-visited-file-modtile (&optional buf)
   "Check that the file BUF is visiting hasn't changed since BUF was opened."
-
-  (let* (metadata new-metadata)
-    (setf metadata (dropbox-cached "metadata" (buffer-file-name buf)))
-    (dropbox-un-cache "metadata" (buffer-file-name buf))
-    (setf newmetadata (dropbox-get-json "metadata" (buffer-file-name buf)))
-
-    (or (dropbox-error-p newmetadata)
-        (string= (cdr (assoc 'rev metadata)) (cdr (assoc 'rev newmetadata))))))
+  (let* ((key      (list "metadata" (buffer-file-name buf)))
+         (metadata (apply #'dropbox-cached key)))
+    (apply #'dropbox-un-cache key)
+    (let ((newmetadata (apply #'dropbox-get-json key)))
+      (or (dropbox-error-p newmetadata)
+          (string= (cdr (assoc 'rev metadata))
+                   (cdr (assoc 'rev newmetadata)))))))
 
 ;;; Directory Contents
 
